@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- ── Primary meta ───────────────────────────────────────── -->
+    <title>Budgetarko</title>
+    <meta name="description" content="Personal finance tracker — capture on phone, review on desktop" />
+    <meta name="theme-color" content="#1f8a5b" />
+
+    <!-- ── Icons ──────────────────────────────────────────────── -->
+    <!-- SVG favicon (modern browsers) -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- Fallback PNG favicon -->
+    <link rel="icon" href="/pwa-64.png" sizes="64x64" type="image/png" />
+    <!-- iOS home-screen icon -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- ── iOS PWA ─────────────────────────────────────────────── -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Budgetarko" />
+
+    <!-- ── Android / Chrome ───────────────────────────────────── -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Budgetarko" />
+
+    <!-- ── Open Graph (for sharing links) ─────────────────────── -->
+    <meta property="og:title" content="Budgetarko" />
+    <meta property="og:description" content="Personal finance tracker" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/pwa-512.png" />
+
+    <!-- ── Fonts ──────────────────────────────────────────────── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
