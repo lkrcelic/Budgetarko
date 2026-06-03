@@ -47,6 +47,46 @@ export function useSubscriptionEntries() {
   }, [entries, profileId])
 }
 
+/**
+ * All one-time expense entries for the current profile in the selected year.
+ * Used by the Expenses overview page.
+ */
+export function useExpenseEntries() {
+  const { data: entries } = useEntries()
+  const profileId = useAppStore(s => s.currentProfileId)
+  const year = useAppStore(s => s.year)
+
+  return useMemo(() => {
+    if (!entries || !profileId) return []
+    return entries.filter(
+      e =>
+        e.profile_id === profileId &&
+        e.kind === 'expense' &&
+        e.year === year,
+    )
+  }, [entries, profileId, year])
+}
+
+/**
+ * All one-time income entries for the current profile in the selected year.
+ * Used by the Income overview page.
+ */
+export function useIncomeEntries() {
+  const { data: entries } = useEntries()
+  const profileId = useAppStore(s => s.currentProfileId)
+  const year = useAppStore(s => s.year)
+
+  return useMemo(() => {
+    if (!entries || !profileId) return []
+    return entries.filter(
+      e =>
+        e.profile_id === profileId &&
+        e.kind === 'income' &&
+        e.year === year,
+    )
+  }, [entries, profileId, year])
+}
+
 /** Get all active installment plans relative to the current month */
 export function useActiveInstallments(): InstallmentPlan[] {
   const { data: entries } = useEntries()

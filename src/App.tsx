@@ -15,6 +15,8 @@ import MonthlyPage       from '@/pages/monthly/monthly-page'
 import AnnualPage        from '@/pages/annual/annual-page'
 import InstallmentsPage  from '@/pages/installments/installments-page'
 import CategoriesPage      from '@/pages/categories/categories-page'
+import ExpensesPage        from '@/pages/expenses/expenses-page'
+import IncomePage          from '@/pages/income/income-page'
 import SubscriptionsPage    from '@/pages/subscriptions/subscriptions-page'
 import ScheduledIncomePage from '@/pages/scheduled-income/scheduled-income-page'
 import SettingsPage         from '@/pages/settings/settings-page'
@@ -88,6 +90,8 @@ function AppLayout() {
       <DesktopShell
         monthly={<MonthlyPage />}
         annual={<AnnualPage />}
+        expenses={<ExpensesPage />}
+        income={<IncomePage />}
         installments={<InstallmentsPage />}
         subscriptions={<SubscriptionsPage />}
         scheduledIncome={<ScheduledIncomePage />}
