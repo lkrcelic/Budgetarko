@@ -1,10 +1,8 @@
 import { useAppStore } from '@/stores/app-store'
 import { useYearData, useMonthItems, useActiveInstallments } from '@/hooks/use-year-data'
-import { useDeleteEntry } from '@/hooks/use-entries'
 import { Money } from '@/components/shared/money'
 import { EntryRow } from '@/components/entry/entry-row'
 import { catColor, MONTHS, MONTHS_LONG } from '@/lib/constants'
-import { toast } from '@/components/shared/toast'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { toIdx } from '@/logic/budget'
 import type { MonthItem } from '@/types'
@@ -20,8 +18,6 @@ export default function MonthlyPage() {
   const yearData = useYearData()
   const items    = useMonthItems()
   const plans    = useActiveInstallments()
-  const deleteEntry = useDeleteEntry()
-
   const net = yearData?.net[month - 1]       ?? 0
   const inc = yearData?.incTotals[month - 1] ?? 0
   const exp = yearData?.expTotals[month - 1] ?? 0
@@ -42,11 +38,6 @@ export default function MonthlyPage() {
   const curIdx   = toIdx(year, month)
   const instThis = plans.filter(p => curIdx >= p.start && curIdx <= p.end && p.paid > 0)
   const instTotal = instThis.reduce((sum, p) => sum + p.per, 0)
-
-  async function handleDelete(id: string) {
-    await deleteEntry.mutateAsync(id)
-    toast('Entry deleted')
-  }
 
   return (
     <div className="min-h-full p-7">
@@ -212,13 +203,11 @@ export default function MonthlyPage() {
           title="Income"
           items={incomes}
           accent="var(--green)"
-          onDelete={handleDelete}
         />
         <ItemListCard
           title="Expenses"
           items={expenses}
           accent="var(--red)"
-          onDelete={handleDelete}
         />
       </div>
     </div>
@@ -229,12 +218,10 @@ function ItemListCard({
   title,
   items,
   accent,
-  onDelete,
 }: {
   title: string
   items: MonthItem[]
   accent: string
-  onDelete: (id: string) => void
 }) {
   return (
     <div className="rounded-[20px] border border-bline bg-bsurface p-5">
@@ -256,7 +243,6 @@ function ItemListCard({
               key={it.entry.id + i}
               item={it}
               variant="desktop"
-              onDelete={() => onDelete(it.entry.id)}
             />
           ))
         )}
