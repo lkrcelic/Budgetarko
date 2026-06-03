@@ -139,15 +139,19 @@ export function EntryForm({
         ? { frequency: values.frequency }
         : {}
 
-    if (entry) {
-      await updateEntry.mutateAsync({ id: entry.id, ...base, ...extras })
-      toast('Entry updated')
-    } else {
-      await createEntry.mutateAsync({ ...base, ...extras })
-      toast(`${meta.label} added`)
+    try {
+      if (entry) {
+        await updateEntry.mutateAsync({ id: entry.id, ...base, ...extras })
+        toast('Entry updated')
+      } else {
+        await createEntry.mutateAsync({ ...base, ...extras })
+        toast(`${meta.label} added`)
+      }
+      onSuccess()
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error'
+      toast(`Failed to save: ${msg}`)
     }
-
-    onSuccess()
   }
 
   // ── Derived display ───────────────────────────────────────────
