@@ -58,3 +58,60 @@ export function useDeleteEntry() {
     },
   })
 }
+
+// ── Subscription / scheduled-income mutations ─────────────────
+
+/** Update a recurring entry's amount with effective date (price-change versioning) */
+export function useUpdateEntryAmount() {
+  const qc = useQueryClient()
+  const profileId = useAppStore(s => s.currentProfileId)
+
+  return useMutation({
+    mutationFn: ({ id, amount, effectiveDate }: { id: string; amount: number; effectiveDate: string }) =>
+      api.updateEntryAmount(id, amount, effectiveDate),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: entriesKey(profileId) })
+    },
+  })
+}
+
+/** Stop a subscription / scheduled income (set end_date) */
+export function useStopEntry() {
+  const qc = useQueryClient()
+  const profileId = useAppStore(s => s.currentProfileId)
+
+  return useMutation({
+    mutationFn: ({ id, endDate }: { id: string; endDate: string }) =>
+      api.stopEntry(id, endDate),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: entriesKey(profileId) })
+    },
+  })
+}
+
+/** Reactivate a stopped subscription / scheduled income */
+export function useReactivateEntry() {
+  const qc = useQueryClient()
+  const profileId = useAppStore(s => s.currentProfileId)
+
+  return useMutation({
+    mutationFn: (id: string) => api.reactivateEntry(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: entriesKey(profileId) })
+    },
+  })
+}
+
+/** Update basic details (description, category, frequency) of a recurring entry */
+export function useUpdateEntryDetails() {
+  const qc = useQueryClient()
+  const profileId = useAppStore(s => s.currentProfileId)
+
+  return useMutation({
+    mutationFn: ({ id, ...patch }: { id: string; description?: string; category?: string; frequency?: string }) =>
+      api.updateEntryDetails(id, patch),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: entriesKey(profileId) })
+    },
+  })
+}

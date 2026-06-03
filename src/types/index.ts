@@ -2,6 +2,12 @@ export type EntryKind = 'expense' | 'income' | 'card' | 'subscription' | 'schedu
 export type FrequencyType = 'monthly' | 'yearly' | 'once'
 export type CategoryType = 'income' | 'expense'
 
+/** A single price-change record stored in entries.amount_history JSONB */
+export interface AmountVersion {
+  amount: number
+  from: string   // ISO date string "YYYY-MM-DD"
+}
+
 // ── DB row shapes ──────────────────────────────────────────────
 
 export interface Profile {
@@ -35,8 +41,10 @@ export interface Entry {
   installments?: number
   start_year?: number
   start_month?: number
-  // Subscription
+  // Subscription / scheduled income
   frequency?: FrequencyType
+  end_date?: string | null            // ISO date — when stopped; null = active
+  amount_history?: AmountVersion[] | null  // price-change versions; null = always use .amount
   created_at: string
   updated_at: string
 }

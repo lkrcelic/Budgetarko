@@ -1,4 +1,4 @@
-import type { Entry, MonthOccurrence, MonthItem, InstallmentPlan, YearData } from '@/types'
+import type { Entry, AmountVersion, MonthOccurrence, MonthItem, InstallmentPlan, YearData } from '@/types'
 
 // ── Index helpers ──────────────────────────────────────────────
 
@@ -12,6 +12,46 @@ export function fromIdx(idx: number): { year: number; month: number } {
   return { year: Math.floor(idx / 12), month: (idx % 12) + 1 }
 }
 
+// ── Amount versioning ──────────────────────────────────────────
+
+/**
+ * Given an entry's amount_history and a target month index,
+ * return the effective amount for that period.
+ *
+ * History entries are sorted by `from` date; we pick the latest one
+ * whose `from` is ≤ the target month's first day.
+ * Falls back to entry.amount when history is null/empty.
+ */
+export function getEffectiveAmount(entry: Entry, idx: number): number {
+  const history = entry.amount_history
+  if (!history || history.length === 0) return entry.amount
+
+  const { year, month } = fromIdx(idx)
+  // First day of the target month as "YYYY-MM-DD"
+  const target = `${year}-${String(month).padStart(2, '0')}-01`
+
+  // Sort ascending by `from` so we can pick the last applicable version
+  const sorted = [...history].sort((a, b) => a.from.localeCompare(b.from))
+
+  let effective = sorted[0].amount // fallback to first version
+  for (const v of sorted) {
+    if (v.from <= target) {
+      effective = v.amount
+    } else {
+      break
+    }
+  }
+  return effective
+}
+
+// ── End-date helpers ──────────────────────────────────────────
+
+/** Convert an end_date ISO string to an absolute month index (inclusive upper bound) */
+function endDateIdx(endDate: string): number {
+  const [y, m] = endDate.split('-').map(Number)
+  return toIdx(y, m)
+}
+
 // ── Core expansion ─────────────────────────────────────────────
 
 /**
@@ -22,23 +62,27 @@ export function fromIdx(idx: number): { year: number; month: number } {
  * - card (n=1)        → one occurrence in entry.month
  * - card (n>1)        → n occurrences starting the month after entry (or custom start_month)
  * - subscription once → one occurrence in entry.month
- * - subscription yearly → one per year for 20 years
- * - subscription monthly → one per month for 10 years (120); buildYear filters by year
+ * - subscription yearly → one per year for 20 years (capped by end_date)
+ * - subscription monthly → one per month for 10 years (capped by end_date)
+ *
+ * Respects end_date: no occurrences are generated past end_date's month.
+ * Respects amount_history: each occurrence uses the effective amount for its period.
  */
 export function expand(entry: Entry): MonthOccurrence[] {
-  const base = toIdx(entry.year, entry.month)
+  const entryBase = toIdx(entry.year, entry.month)
   const out: MonthOccurrence[] = []
+  const cap = entry.end_date ? endDateIdx(entry.end_date) : Infinity
 
   switch (entry.kind) {
     case 'card': {
       const n = Math.max(1, entry.installments ?? 1)
       if (n === 1) {
-        out.push({ idx: base, amount: entry.amount })
+        out.push({ idx: entryBase, amount: entry.amount })
       } else {
         const startIdx =
           entry.start_month != null
             ? toIdx(entry.start_year ?? entry.year, entry.start_month)
-            : base + 1 // default: next month
+            : entryBase + 1 // default: next month
         const per = entry.amount / n
         for (let i = 0; i < n; i++) {
           out.push({ idx: startIdx + i, amount: per })
@@ -51,15 +95,21 @@ export function expand(entry: Entry): MonthOccurrence[] {
     case 'scheduled_income': {
       const freq = entry.frequency ?? 'monthly'
       if (freq === 'once') {
-        out.push({ idx: base, amount: entry.amount })
+        if (entryBase <= cap) {
+          out.push({ idx: entryBase, amount: getEffectiveAmount(entry, entryBase) })
+        }
       } else if (freq === 'yearly') {
         for (let y = 0; y < 20; y++) {
-          out.push({ idx: base + y * 12, amount: entry.amount })
+          const idx = entryBase + y * 12
+          if (idx > cap) break
+          out.push({ idx, amount: getEffectiveAmount(entry, idx) })
         }
       } else {
         // monthly — 10 years of occurrences, filtered downstream by year
         for (let i = 0; i < 120; i++) {
-          out.push({ idx: base + i, amount: entry.amount })
+          const idx = entryBase + i
+          if (idx > cap) break
+          out.push({ idx, amount: getEffectiveAmount(entry, idx) })
         }
       }
       break
@@ -67,7 +117,7 @@ export function expand(entry: Entry): MonthOccurrence[] {
 
     default:
       // expense or income — single month
-      out.push({ idx: base, amount: entry.amount })
+      out.push({ idx: entryBase, amount: entry.amount })
   }
 
   return out

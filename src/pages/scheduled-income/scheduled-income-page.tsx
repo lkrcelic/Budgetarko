@@ -45,22 +45,22 @@ function formatEndDate(iso: string): string {
 
 // ── Page ───────────────────────────────────────────────────────
 
-export default function SubscriptionsPage() {
+export default function ScheduledIncomePage() {
   const entries     = useSubscriptionEntries()
   const deleteEntry = useDeleteEntry()
 
-  // Only show subscription (expense) entries — scheduled_income has its own page
-  const allSubs = entries.filter(e => e.kind === 'subscription')
+  // Only scheduled_income entries
+  const allIncome = entries.filter(e => e.kind === 'scheduled_income')
 
-  const activeSubs    = allSubs.filter(e => !isCancelled(e))
-  const cancelledSubs = allSubs.filter(e => isCancelled(e))
+  const activeIncome    = allIncome.filter(e => !isCancelled(e))
+  const cancelledIncome = allIncome.filter(e => isCancelled(e))
 
   const [showCancelled, setShowCancelled] = useState(false)
 
   // Recurring-only totals (exclude 'once' and cancelled)
-  const recurActive = activeSubs.filter(e => e.frequency !== 'once' && !e.end_date)
-  const subMonthly = recurActive.reduce((s, e) => s + perMonth(e), 0)
-  const subYearly  = recurActive.reduce((s, e) => s + perYear(e),  0)
+  const recurActive = activeIncome.filter(e => e.frequency !== 'once' && !e.end_date)
+  const incMonthly = recurActive.reduce((s, e) => s + perMonth(e), 0)
+  const incYearly  = recurActive.reduce((s, e) => s + perYear(e),  0)
 
   // Modal state
   const [editEntry, setEditEntry] = useState<Entry | null>(null)
@@ -71,62 +71,67 @@ export default function SubscriptionsPage() {
     toast(`"${name}" deleted`)
   }
 
+  const accentColor = KIND_META.scheduled_income.color
+  const accentSoft  = KIND_META.scheduled_income.soft
+
   return (
     <div className="min-h-full p-7">
 
       {/* ── Page header ── */}
       <div className="mb-6">
         <div className="text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
-          Recurring expenses
+          Recurring
         </div>
         <h1 className="mt-0.5 text-[26px] font-extrabold tracking-tight text-bink">
-          Subscriptions
+          Scheduled Income
         </h1>
       </div>
 
       {/* ── Summary stats ── */}
-      {activeSubs.length > 0 && (
+      {activeIncome.length > 0 && (
         <div className="mb-7 grid grid-cols-2 gap-4">
-          {/* Monthly cost */}
+          {/* Monthly income */}
           <div className="rounded-[20px] border border-bline bg-bsurface p-5">
             <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
               Per month
             </div>
             <Money
-              value={subMonthly}
+              value={incMonthly}
               auto
-              className="block text-[28px] font-extrabold tracking-tight text-bred"
+              className="block text-[28px] font-extrabold tracking-tight"
+              style={{ color: accentColor }}
             />
           </div>
 
-          {/* Yearly cost */}
+          {/* Yearly income */}
           <div className="rounded-[20px] border border-bline bg-bsurface p-5">
             <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
               Per year
             </div>
             <Money
-              value={subYearly}
+              value={incYearly}
               auto
-              className="block text-[28px] font-extrabold tracking-tight text-bred"
+              className="block text-[28px] font-extrabold tracking-tight"
+              style={{ color: accentColor }}
             />
           </div>
         </div>
       )}
 
-      {/* ── Active subscriptions ── */}
+      {/* ── Active income entries ── */}
       <Section
-        title="Active subscriptions"
-        entries={activeSubs}
-        monthlyTotal={subMonthly}
-        yearlyTotal={subYearly}
-        accentColor={KIND_META.subscription.color}
-        accentSoft={KIND_META.subscription.soft}
+        title="Active scheduled income"
+        entries={activeIncome}
+        monthlyTotal={incMonthly}
+        yearlyTotal={incYearly}
+        accentColor={accentColor}
+        accentSoft={accentSoft}
         onDelete={handleDelete}
         onClickRow={setEditEntry}
       />
 
       {/* ── Cancelled toggle ── */}
-      {cancelledSubs.length > 0 && (
+      {cancelledIncome.length > 0 && (
         <div className="mb-4">
           <button
             type="button"
@@ -134,16 +139,16 @@ export default function SubscriptionsPage() {
             className="flex items-center gap-2 rounded-[10px] px-3 py-2 text-[12.5px] font-semibold text-bmuted transition-colors hover:bg-bsurface-2 hover:text-bink-2"
           >
             {showCancelled ? <EyeOff size={14} /> : <Eye size={14} />}
-            {showCancelled ? 'Hide' : 'Show'} cancelled ({cancelledSubs.length})
+            {showCancelled ? 'Hide' : 'Show'} cancelled ({cancelledIncome.length})
           </button>
         </div>
       )}
 
-      {/* ── Cancelled subscriptions ── */}
-      {showCancelled && cancelledSubs.length > 0 && (
+      {/* ── Cancelled income ── */}
+      {showCancelled && cancelledIncome.length > 0 && (
         <Section
           title="Cancelled"
-          entries={cancelledSubs}
+          entries={cancelledIncome}
           monthlyTotal={0}
           yearlyTotal={0}
           accentColor="#8a948c"
@@ -155,11 +160,11 @@ export default function SubscriptionsPage() {
       )}
 
       {/* Empty state */}
-      {allSubs.length === 0 && (
+      {allIncome.length === 0 && (
         <div className="rounded-[20px] border border-bline bg-bsurface px-6 py-14 text-center">
-          <div className="text-[15px] font-semibold text-bink">No subscriptions yet</div>
+          <div className="text-[15px] font-semibold text-bink">No scheduled income yet</div>
           <div className="mt-1 text-[13px] text-bmuted">
-            Add a subscription entry to track recurring costs.
+            Add a scheduled income entry to track recurring revenue like salary, rent income, etc.
           </div>
         </div>
       )}
@@ -204,7 +209,6 @@ function Section({
   const recurring = entries.filter(e => e.frequency !== 'once')
   const oneTime   = entries.filter(e => e.frequency === 'once')
 
-  // Sort: monthly first (highest amount), then yearly (highest amount), then one-time
   const sorted = [
     ...recurring.filter(e => e.frequency === 'monthly').sort((a, b) => b.amount - a.amount),
     ...recurring.filter(e => e.frequency === 'yearly').sort((a, b) => b.amount - a.amount),
