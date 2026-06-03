@@ -29,6 +29,24 @@ export function useMonthItems(): MonthItem[] {
   }, [entries, profileId, year, month])
 }
 
+/**
+ * All subscription + scheduled_income entries for the current profile.
+ * Used by the Subscriptions page.
+ */
+export function useSubscriptionEntries() {
+  const { data: entries } = useEntries()
+  const profileId = useAppStore(s => s.currentProfileId)
+
+  return useMemo(() => {
+    if (!entries || !profileId) return []
+    return entries.filter(
+      e =>
+        e.profile_id === profileId &&
+        (e.kind === 'subscription' || e.kind === 'scheduled_income'),
+    )
+  }, [entries, profileId])
+}
+
 /** Get all active installment plans relative to the current month */
 export function useActiveInstallments(): InstallmentPlan[] {
   const { data: entries } = useEntries()

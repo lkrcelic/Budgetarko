@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Wallet, Calendar, LayoutGrid, Layers, Tag, Settings, ArrowLeftRight } from 'lucide-react'
+import { Wallet, Calendar, LayoutGrid, Layers, Repeat, Tag, Settings, ArrowLeftRight } from 'lucide-react'
 import { Avatar } from '@/components/shared/avatar'
 import { useProfiles } from '@/hooks/use-profiles'
 import { useSharedWithMe } from '@/hooks/use-sharing'
@@ -9,10 +9,11 @@ import { cn } from '@/lib/utils'
 import type { Profile } from '@/types'
 
 const NAV = [
-  { to: '/monthly',       label: 'Monthly',       Icon: Calendar    },
-  { to: '/annual',        label: 'Annual matrix', Icon: LayoutGrid  },
-  { to: '/installments',  label: 'Installments',  Icon: Layers      },
-  { to: '/categories',    label: 'Categories',    Icon: Tag         },
+  { to: '/monthly',        label: 'Monthly',        Icon: Calendar   },
+  { to: '/annual',         label: 'Annual matrix',  Icon: LayoutGrid },
+  { to: '/installments',   label: 'Installments',   Icon: Layers     },
+  { to: '/subscriptions',  label: 'Subscriptions',  Icon: Repeat     },
+  { to: '/categories',     label: 'Categories',     Icon: Tag        },
 ] as const
 
 export function Sidebar() {

@@ -14,8 +14,9 @@ import HomePage          from '@/pages/home/home-page'
 import MonthlyPage       from '@/pages/monthly/monthly-page'
 import AnnualPage        from '@/pages/annual/annual-page'
 import InstallmentsPage  from '@/pages/installments/installments-page'
-import CategoriesPage    from '@/pages/categories/categories-page'
-import SettingsPage      from '@/pages/settings/settings-page'
+import CategoriesPage      from '@/pages/categories/categories-page'
+import SubscriptionsPage  from '@/pages/subscriptions/subscriptions-page'
+import SettingsPage       from '@/pages/settings/settings-page'
 
 // ── Loading / setup screens ────────────────────────────────────
 
@@ -87,6 +88,7 @@ function AppLayout() {
         monthly={<MonthlyPage />}
         annual={<AnnualPage />}
         installments={<InstallmentsPage />}
+        subscriptions={<SubscriptionsPage />}
         categories={<CategoriesPage />}
         settings={<SettingsPage />}
       />
