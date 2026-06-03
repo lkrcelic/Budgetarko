@@ -39,8 +39,9 @@ export default function MonthlyPage() {
   const maxCat  = Math.max(1, ...catBars.map(([, v]) => v))
 
   // Installments due this month
-  const curIdx = toIdx(year, month)
+  const curIdx   = toIdx(year, month)
   const instThis = plans.filter(p => curIdx >= p.start && curIdx <= p.end && p.paid > 0)
+  const instTotal = instThis.reduce((sum, p) => sum + p.per, 0)
 
   async function handleDelete(id: string) {
     await deleteEntry.mutateAsync(id)
@@ -167,8 +168,16 @@ export default function MonthlyPage() {
       {/* ── Installments due this month ── */}
       {instThis.length > 0 && (
         <div className="mb-5 rounded-[20px] border border-bamber-soft bg-bamber-soft p-5">
-          <div className="mb-4 text-[13px] font-bold text-[#7a5f23]">
-            Installments due this month
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-[13px] font-bold text-[#7a5f23]">
+              Installments due this month
+            </span>
+            <span className="flex items-baseline gap-1.5">
+              <Money value={instTotal} cents className="text-[16px] font-extrabold text-bamber" />
+              <span className="text-[11px] font-semibold text-[#7a5f23]/60">
+                across {instThis.length} plan{instThis.length !== 1 ? 's' : ''}
+              </span>
+            </span>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {instThis.map(p => {

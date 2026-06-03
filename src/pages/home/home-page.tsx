@@ -78,7 +78,8 @@ export default function HomePage() {
   const positive = net >= 0
 
   // Active non-done plans with at least one payment made
-  const activeInsts = installments.filter(p => !p.done && p.paid > 0)
+  const activeInsts  = installments.filter(p => !p.done && p.paid > 0)
+  const instTotal    = activeInsts.reduce((sum, p) => sum + p.per, 0)
 
   // Income first, then expenses; cap at 6 recent
   const recent = [...items]
@@ -189,8 +190,14 @@ export default function HomePage() {
         {/* ── Active installments ── */}
         {activeInsts.length > 0 && (
           <div className="mx-5 mt-6">
-            <div className="mb-3 text-[12px] font-bold uppercase tracking-[0.04em] text-bmuted">
-              Active installments
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-[12px] font-bold uppercase tracking-[0.04em] text-bmuted">
+                Active installments
+              </span>
+              <span className="flex items-baseline gap-1">
+                <Money value={instTotal} cents className="text-[14px] font-extrabold text-bamber" />
+                <span className="text-[11px] font-semibold text-bmuted">/mo</span>
+              </span>
             </div>
             <div className="flex flex-col gap-2.5">
               {activeInsts.map(plan => (
