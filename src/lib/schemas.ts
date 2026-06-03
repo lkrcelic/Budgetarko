@@ -12,7 +12,7 @@ export const entryFormSchema = z.object({
       const n = parseFloat(v)
       return !isNaN(n) && n > 0
     }, 'Amount must be greater than 0'),
-  category:    z.string().min(1, 'Select a category'),
+  category:    z.string().default('uncategorized'),
   description: z.string().default(''),
   year:        z.number().int().positive(),
   month:       z.number().int().min(1).max(12),

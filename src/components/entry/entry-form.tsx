@@ -72,7 +72,7 @@ export function EntryForm({
           }
         : {
             amount:       '',
-            category:     '',
+            category:     'uncategorized',
             description:  '',
             year:         appYear,
             month:        appMonth,
@@ -153,7 +153,7 @@ export function EntryForm({
   // ── Derived display ───────────────────────────────────────────
 
   const amountNum = parseFloat(amountStr) || 0
-  const isValid   = amountNum > 0 && category.length > 0
+  const isValid   = amountNum > 0
 
   const saveLabel = (() => {
     const base = entry ? 'Update' : 'Save'
@@ -201,7 +201,7 @@ export function EntryForm({
 
         {/* Category */}
         <p className="mb-[9px] mt-[18px] text-[12px] font-bold uppercase tracking-[0.04em] text-bmuted">
-          Category
+          Category <span className="font-normal normal-case tracking-normal opacity-60">(optional)</span>
         </p>
         {/* Hidden field for RHF validation */}
         <input type="hidden" {...register('category')} />

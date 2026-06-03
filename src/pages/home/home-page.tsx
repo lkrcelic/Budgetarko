@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAppStore } from '@/stores/app-store'
 import { useProfiles } from '@/hooks/use-profiles'
@@ -8,6 +8,52 @@ import { Avatar } from '@/components/shared/avatar'
 import { EntryRow } from '@/components/entry/entry-row'
 import { MONTHS_LONG } from '@/lib/constants'
 import { AddEntryFlow } from './add-entry-flow'
+
+/**
+ * Attach horizontal-swipe detection to a scroll container.
+ * Only fires when horizontal movement clearly dominates vertical
+ * (so vertical scrolling is never accidentally blocked).
+ */
+function useHorizontalSwipe(
+  ref: React.RefObject<HTMLElement>,
+  onSwipeLeft: () => void,
+  onSwipeRight: () => void,
+  enabled = true,
+) {
+  const onLeft  = useCallback(onSwipeLeft,  [onSwipeLeft])
+  const onRight = useCallback(onSwipeRight, [onSwipeRight])
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el || !enabled) return
+
+    let startX = 0
+    let startY = 0
+
+    function onTouchStart(e: TouchEvent) {
+      startX = e.touches[0].clientX
+      startY = e.touches[0].clientY
+    }
+
+    function onTouchEnd(e: TouchEvent) {
+      const dx = e.changedTouches[0].clientX - startX
+      const dy = e.changedTouches[0].clientY - startY
+
+      // Only treat as horizontal swipe when x-delta clearly dominates y-delta
+      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return
+
+      if (dx < 0) onLeft()   // swiped left  → next month
+      else        onRight()  // swiped right → prev month
+    }
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true })
+    el.addEventListener('touchend',   onTouchEnd,   { passive: true })
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchend',   onTouchEnd)
+    }
+  }, [ref, enabled, onLeft, onRight])
+}
 
 export default function HomePage() {
   const [adding, setAdding] = useState(false)
@@ -39,6 +85,9 @@ export default function HomePage() {
     .sort((a, b) => (a.income === b.income ? 0 : a.income ? -1 : 1))
     .slice(0, 6)
 
+  const scrollRef = useRef<HTMLDivElement>(null)
+  useHorizontalSwipe(scrollRef, nextMonth, prevMonth, !adding)
+
   function switchProfile() {
     if (!profiles || profiles.length < 2) return
     const ids = profiles.map(p => p.id)
@@ -48,7 +97,7 @@ export default function HomePage() {
 
   return (
     <div className="relative h-dvh overflow-hidden bg-bbg font-sans">
-      <div className="h-full overflow-y-auto">
+      <div ref={scrollRef} className="h-full overflow-y-auto">
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-5 pb-2 pt-[52px]">

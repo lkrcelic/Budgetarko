@@ -52,6 +52,26 @@ export async function toggleCategory(id: string, active: boolean): Promise<void>
   if (error) throw error
 }
 
+/** Rename a category */
+export async function renameCategory(id: string, name: string): Promise<void> {
+  const { error } = await supabase
+    .from('categories')
+    .update({ name: name.trim() })
+    .eq('id', id)
+
+  if (error) throw error
+}
+
+/** Delete a category row */
+export async function deleteCategory(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('categories')
+    .delete()
+    .eq('id', id)
+
+  if (error) throw error
+}
+
 /**
  * Seed all default categories for a new user.
  * Called once on first sign-in. Uses upsert so it's idempotent.

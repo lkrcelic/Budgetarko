@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as api from '@/services/categories'
+import * as entriesApi from '@/services/entries'
 import { useAppStore } from '@/stores/app-store'
 import type { Category } from '@/types'
 
@@ -37,5 +38,33 @@ export function useToggleCategory() {
     mutationFn: ({ id, active }: { id: string; active: boolean }) =>
       api.toggleCategory(id, active),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
+  })
+}
+
+/** Rename a category */
+export function useRenameCategory() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      api.renameCategory(id, name),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
+  })
+}
+
+/**
+ * Delete a category.
+ * Entries that used this category are reset to 'uncategorized' first.
+ */
+export function useDeleteCategory() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      await entriesApi.resetCategoryOnEntries(name)
+      await api.deleteCategory(id)
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['categories'] })
+      qc.invalidateQueries({ queryKey: ['entries'] })
+    },
   })
 }

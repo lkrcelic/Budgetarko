@@ -52,3 +52,17 @@ export async function deleteEntry(id: string): Promise<void> {
 
   if (error) throw error
 }
+
+/**
+ * Reset all entries that have the given category name to 'uncategorized'.
+ * Called before deleting a category so existing entries don't become orphaned.
+ * RLS ensures only the current user's entries are affected.
+ */
+export async function resetCategoryOnEntries(categoryName: string): Promise<void> {
+  const { error } = await supabase
+    .from('entries')
+    .update({ category: 'uncategorized' })
+    .eq('category', categoryName)
+
+  if (error) throw error
+}
