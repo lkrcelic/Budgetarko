@@ -72,6 +72,10 @@ export default function IncomePage() {
   // One-time totals
   const oneTimeTotal = oneTimeEntries.reduce((sum, e) => sum + e.amount, 0)
 
+  // Combined totals (one-time for the year + recurring annualised)
+  const totalYear  = oneTimeTotal + incYearly
+  const totalMonth = totalYear / 12
+
   // Group one-time entries by month
   const grouped = useMemo(() => {
     const byMonth: Record<number, Entry[]> = {}
@@ -126,32 +130,53 @@ export default function IncomePage() {
 
       {/* ── Summary cards ── */}
       {hasAnything && (
-        <div className={`mb-7 grid gap-4 ${activeScheduled.length > 0 ? 'grid-cols-3' : 'grid-cols-2'}`}>
-          <div className="rounded-[20px] border border-bline bg-bsurface p-5">
-            <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
-              One-time in {year}
+        <>
+          {/* Combined totals — prominent row */}
+          <div className="mb-4 grid grid-cols-2 gap-4">
+            <div className="rounded-[20px] bg-bgreen p-5">
+              <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-white/70">
+                Total per month
+              </div>
+              <Money value={totalMonth} auto className="block text-[28px] font-extrabold tracking-tight text-white" />
+              <div className="mt-1 text-[12px] text-white/60">average across {year}</div>
             </div>
-            <Money value={oneTimeTotal} auto className="block text-[28px] font-extrabold tracking-tight text-bgreen" />
-            <div className="mt-1 text-[12px] text-bmuted">{oneTimeEntries.length} entries</div>
+            <div className="rounded-[20px] border border-bgreen/30 bg-bgreen-soft p-5">
+              <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bgreen/70">
+                Total per year
+              </div>
+              <Money value={totalYear} auto className="block text-[28px] font-extrabold tracking-tight text-bgreen" />
+              <div className="mt-1 text-[12px] text-bgreen/60">one-time + recurring</div>
+            </div>
           </div>
-          {activeScheduled.length > 0 && (
-            <>
-              <div className="rounded-[20px] border border-bline bg-bsurface p-5">
-                <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
-                  Recurring /mo
-                </div>
-                <Money value={incMonthly} auto className="block text-[28px] font-extrabold tracking-tight" style={{ color: accent }} />
-                <div className="mt-1 text-[12px] text-bmuted">{recurActive.length} active</div>
+
+          {/* Breakdown row */}
+          <div className={`mb-7 grid gap-4 ${activeScheduled.length > 0 ? 'grid-cols-3' : 'grid-cols-1'}`}>
+            <div className="rounded-[20px] border border-bline bg-bsurface p-5">
+              <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
+                One-time in {year}
               </div>
-              <div className="rounded-[20px] border border-bline bg-bsurface p-5">
-                <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
-                  Recurring /yr
+              <Money value={oneTimeTotal} auto className="block text-[22px] font-extrabold tracking-tight text-bgreen" />
+              <div className="mt-1 text-[12px] text-bmuted">{oneTimeEntries.length} entries</div>
+            </div>
+            {activeScheduled.length > 0 && (
+              <>
+                <div className="rounded-[20px] border border-bline bg-bsurface p-5">
+                  <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
+                    Recurring /mo
+                  </div>
+                  <Money value={incMonthly} auto className="block text-[22px] font-extrabold tracking-tight" style={{ color: accent }} />
+                  <div className="mt-1 text-[12px] text-bmuted">{recurActive.length} active</div>
                 </div>
-                <Money value={incYearly} auto className="block text-[28px] font-extrabold tracking-tight" style={{ color: accent }} />
-              </div>
-            </>
-          )}
-        </div>
+                <div className="rounded-[20px] border border-bline bg-bsurface p-5">
+                  <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
+                    Recurring /yr
+                  </div>
+                  <Money value={incYearly} auto className="block text-[22px] font-extrabold tracking-tight" style={{ color: accent }} />
+                </div>
+              </>
+            )}
+          </div>
+        </>
       )}
 
       {/* ── Recurring income section ── */}

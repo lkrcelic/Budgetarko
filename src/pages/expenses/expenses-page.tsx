@@ -72,6 +72,10 @@ export default function ExpensesPage() {
   // One-time totals
   const oneTimeTotal = oneTimeEntries.reduce((sum, e) => sum + e.amount, 0)
 
+  // Combined totals (one-time for the year + recurring annualised)
+  const totalYear  = oneTimeTotal + subYearly
+  const totalMonth = totalYear / 12
+
   // Group one-time entries by month
   const grouped = useMemo(() => {
     const byMonth: Record<number, Entry[]> = {}
@@ -123,32 +127,53 @@ export default function ExpensesPage() {
 
       {/* ── Summary cards ── */}
       {hasAnything && (
-        <div className={`mb-7 grid gap-4 ${activeSubs.length > 0 ? 'grid-cols-3' : 'grid-cols-2'}`}>
-          <div className="rounded-[20px] border border-bline bg-bsurface p-5">
-            <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
-              One-time in {year}
+        <>
+          {/* Combined totals — prominent row */}
+          <div className="mb-4 grid grid-cols-2 gap-4">
+            <div className="rounded-[20px] bg-bred p-5">
+              <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-white/70">
+                Total per month
+              </div>
+              <Money value={totalMonth} auto className="block text-[28px] font-extrabold tracking-tight text-white" />
+              <div className="mt-1 text-[12px] text-white/60">average across {year}</div>
             </div>
-            <Money value={oneTimeTotal} auto className="block text-[28px] font-extrabold tracking-tight text-bred" />
-            <div className="mt-1 text-[12px] text-bmuted">{oneTimeEntries.length} entries</div>
+            <div className="rounded-[20px] border border-bred/30 bg-bred-soft p-5">
+              <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bred/70">
+                Total per year
+              </div>
+              <Money value={totalYear} auto className="block text-[28px] font-extrabold tracking-tight text-bred" />
+              <div className="mt-1 text-[12px] text-bred/60">one-time + recurring</div>
+            </div>
           </div>
-          {activeSubs.length > 0 && (
-            <>
-              <div className="rounded-[20px] border border-bline bg-bsurface p-5">
-                <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
-                  Subscriptions /mo
-                </div>
-                <Money value={subMonthly} auto className="block text-[28px] font-extrabold tracking-tight" style={{ color: KIND_META.subscription.color }} />
-                <div className="mt-1 text-[12px] text-bmuted">{recurActive.length} active</div>
+
+          {/* Breakdown row */}
+          <div className={`mb-7 grid gap-4 ${activeSubs.length > 0 ? 'grid-cols-3' : 'grid-cols-1'}`}>
+            <div className="rounded-[20px] border border-bline bg-bsurface p-5">
+              <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
+                One-time in {year}
               </div>
-              <div className="rounded-[20px] border border-bline bg-bsurface p-5">
-                <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
-                  Subscriptions /yr
+              <Money value={oneTimeTotal} auto className="block text-[22px] font-extrabold tracking-tight text-bred" />
+              <div className="mt-1 text-[12px] text-bmuted">{oneTimeEntries.length} entries</div>
+            </div>
+            {activeSubs.length > 0 && (
+              <>
+                <div className="rounded-[20px] border border-bline bg-bsurface p-5">
+                  <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
+                    Subscriptions /mo
+                  </div>
+                  <Money value={subMonthly} auto className="block text-[22px] font-extrabold tracking-tight" style={{ color: KIND_META.subscription.color }} />
+                  <div className="mt-1 text-[12px] text-bmuted">{recurActive.length} active</div>
                 </div>
-                <Money value={subYearly} auto className="block text-[28px] font-extrabold tracking-tight" style={{ color: KIND_META.subscription.color }} />
-              </div>
-            </>
-          )}
-        </div>
+                <div className="rounded-[20px] border border-bline bg-bsurface p-5">
+                  <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
+                    Subscriptions /yr
+                  </div>
+                  <Money value={subYearly} auto className="block text-[22px] font-extrabold tracking-tight" style={{ color: KIND_META.subscription.color }} />
+                </div>
+              </>
+            )}
+          </div>
+        </>
       )}
 
       {/* ── Recurring subscriptions section ── */}
