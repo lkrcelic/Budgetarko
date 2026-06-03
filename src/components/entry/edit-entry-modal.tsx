@@ -4,7 +4,7 @@ import { X } from 'lucide-react'
 import { catColor, KIND_META } from '@/lib/constants'
 import { useActiveCategories } from '@/hooks/use-categories'
 import { useUpdateEntry } from '@/hooks/use-entries'
-import { toast } from '@/components/shared/toast'
+import { toast, toastError } from '@/components/shared/toast'
 import { MONTHS } from '@/lib/constants'
 import type { Entry } from '@/types'
 
@@ -67,8 +67,8 @@ export function EditEntryModal({ entry, open, onOpenChange }: Props) {
       })
       toast('Entry updated')
       onOpenChange(false)
-    } catch {
-      toast('Failed to update')
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : 'Failed to update')
     }
   }
 

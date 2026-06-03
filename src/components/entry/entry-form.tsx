@@ -8,7 +8,7 @@ import { useCreateEntry, useUpdateEntry } from '@/hooks/use-entries'
 import { useActiveCategories } from '@/hooks/use-categories'
 import { previewSplit } from '@/logic/budget'
 import { money } from '@/lib/money'
-import { toast } from '@/components/shared/toast'
+import { toast, toastError } from '@/components/shared/toast'
 import { MonthPicker } from '@/components/shared/month-picker'
 import { AmountPad, applyAmountKey } from './amount-pad'
 import { CategoryChips } from './category-chips'
@@ -149,8 +149,7 @@ export function EntryForm({
       }
       onSuccess()
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown error'
-      toast(`Failed to save: ${msg}`)
+      toastError(err instanceof Error ? err.message : 'Failed to save entry')
     }
   }
 

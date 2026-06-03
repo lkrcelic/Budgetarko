@@ -10,15 +10,16 @@ import {
   useStopEntry,
   useReactivateEntry,
 } from '@/hooks/use-entries'
-import { toast } from '@/components/shared/toast'
+import { toast, toastError } from '@/components/shared/toast'
 import type { Entry, FrequencyType, AmountVersion } from '@/types'
 
 // ── Helpers ────────────────────────────────────────────────────
 
-function toISOMonth(date: Date): string {
+/** Returns "YYYY-MM" for use with <input type="month"> */
+function toYearMonth(date: Date): string {
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, '0')
-  return `${y}-${m}-01`
+  return `${y}-${m}`
 }
 
 function formatDate(iso: string): string {
@@ -70,12 +71,12 @@ export function EditRecurringModal({ entry, open, onOpenChange }: Props) {
   useEffect(() => {
     if (!open) return
     setAmount(String(entry.amount))
-    setEffectiveDate(toISOMonth(new Date()))
+    setEffectiveDate(toYearMonth(new Date()))
     setDescription(entry.description)
     setCategory(entry.category)
     setFrequency(entry.frequency ?? 'monthly')
     setShowStopPicker(false)
-    setStopDate(new Date().toISOString().slice(0, 10))
+    setStopDate(toYearMonth(new Date()))
   }, [entry, open])
 
   // ── Derived ──────────────────────────────────────────────────
@@ -103,7 +104,7 @@ export function EditRecurringModal({ entry, open, onOpenChange }: Props) {
         await updateAmount.mutateAsync({
           id: entry.id,
           amount: amountNum,
-          effectiveDate,
+          effectiveDate: effectiveDate + '-01',
         })
       }
       if (detailsChanged) {
@@ -116,18 +117,18 @@ export function EditRecurringModal({ entry, open, onOpenChange }: Props) {
       }
       toast('Entry updated')
       onOpenChange(false)
-    } catch {
-      toast('Failed to update')
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : 'Failed to update')
     }
   }
 
   async function handleStop() {
     try {
-      await stopEntry.mutateAsync({ id: entry.id, endDate: stopDate })
+      await stopEntry.mutateAsync({ id: entry.id, endDate: stopDate + '-01' })
       toast('Subscription stopped')
       onOpenChange(false)
-    } catch {
-      toast('Failed to stop')
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : 'Failed to stop')
     }
   }
 
@@ -136,8 +137,8 @@ export function EditRecurringModal({ entry, open, onOpenChange }: Props) {
       await reactivateEntry.mutateAsync(entry.id)
       toast('Reactivated')
       onOpenChange(false)
-    } catch {
-      toast('Failed to reactivate')
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : 'Failed to reactivate')
     }
   }
 
@@ -209,7 +210,7 @@ export function EditRecurringModal({ entry, open, onOpenChange }: Props) {
                 New amount effective from
               </label>
               <input
-                type="date"
+                type="month"
                 value={effectiveDate}
                 onChange={e => setEffectiveDate(e.target.value)}
                 className="h-[44px] w-full rounded-[12px] border border-bline bg-bsurface-2 px-3.5 text-[14px] text-bink outline-none transition-colors focus:border-bink"
@@ -366,7 +367,7 @@ export function EditRecurringModal({ entry, open, onOpenChange }: Props) {
                     End date
                   </label>
                   <input
-                    type="date"
+                    type="month"
                     value={stopDate}
                     onChange={e => setStopDate(e.target.value)}
                     className="h-[40px] w-full rounded-[10px] border border-bline bg-bsurface px-3 text-[14px] text-bink outline-none focus:border-bred"
