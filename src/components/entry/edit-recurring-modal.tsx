@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { X, StopCircle, RotateCcw, History } from 'lucide-react'
 import { Money } from '@/components/shared/money'
+import { MonthPicker } from '@/components/shared/month-picker'
 import { catColor, KIND_META } from '@/lib/constants'
 import { useActiveCategories } from '@/hooks/use-categories'
 import {
@@ -15,12 +16,8 @@ import type { Entry, FrequencyType, AmountVersion } from '@/types'
 
 // ── Helpers ────────────────────────────────────────────────────
 
-/** Returns "YYYY-MM" for use with <input type="month"> */
-function toYearMonth(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  return `${y}-${m}`
-}
+function pad(n: number) { return String(n).padStart(2, '0') }
+function toISODate(year: number, month: number) { return `${year}-${pad(month)}-01` }
 
 function formatDate(iso: string): string {
   const d = new Date(iso + 'T00:00:00')
@@ -58,25 +55,31 @@ export function EditRecurringModal({ entry, open, onOpenChange }: Props) {
   // ── Local form state ─────────────────────────────────────────
 
   const [amount, setAmount] = useState('')
-  const [effectiveDate, setEffectiveDate] = useState('')
+  // Effective-from month for price changes
+  const [effectiveYear, setEffectiveYear]   = useState(new Date().getFullYear())
+  const [effectiveMonth, setEffectiveMonth] = useState(new Date().getMonth() + 1)
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('')
   const [frequency, setFrequency] = useState<FrequencyType>('monthly')
 
   // Stop controls
   const [showStopPicker, setShowStopPicker] = useState(false)
-  const [stopDate, setStopDate] = useState('')
+  const [stopYear, setStopYear]   = useState(new Date().getFullYear())
+  const [stopMonth, setStopMonth] = useState(new Date().getMonth() + 1)
 
   // Reset state when entry changes or modal opens
   useEffect(() => {
     if (!open) return
+    const now = new Date()
     setAmount(String(entry.amount))
-    setEffectiveDate(toYearMonth(new Date()))
+    setEffectiveYear(now.getFullYear())
+    setEffectiveMonth(now.getMonth() + 1)
     setDescription(entry.description)
     setCategory(entry.category)
     setFrequency(entry.frequency ?? 'monthly')
     setShowStopPicker(false)
-    setStopDate(toYearMonth(new Date()))
+    setStopYear(now.getFullYear())
+    setStopMonth(now.getMonth() + 1)
   }, [entry, open])
 
   // ── Derived ──────────────────────────────────────────────────
@@ -104,7 +107,7 @@ export function EditRecurringModal({ entry, open, onOpenChange }: Props) {
         await updateAmount.mutateAsync({
           id: entry.id,
           amount: amountNum,
-          effectiveDate: effectiveDate + '-01',
+          effectiveDate: toISODate(effectiveYear, effectiveMonth),
         })
       }
       if (detailsChanged) {
@@ -124,7 +127,7 @@ export function EditRecurringModal({ entry, open, onOpenChange }: Props) {
 
   async function handleStop() {
     try {
-      await stopEntry.mutateAsync({ id: entry.id, endDate: stopDate + '-01' })
+      await stopEntry.mutateAsync({ id: entry.id, endDate: toISODate(stopYear, stopMonth) })
       toast('Subscription stopped')
       onOpenChange(false)
     } catch (err) {
@@ -205,15 +208,14 @@ export function EditRecurringModal({ entry, open, onOpenChange }: Props) {
 
           {/* ── Effective date (only shown when amount changed) ── */}
           {amountChanged && (
-            <div className="mb-4">
-              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
+            <div className="mb-4 flex items-center justify-between">
+              <label className="text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
                 New amount effective from
               </label>
-              <input
-                type="month"
-                value={effectiveDate}
-                onChange={e => setEffectiveDate(e.target.value)}
-                className="h-[44px] w-full rounded-[12px] border border-bline bg-bsurface-2 px-3.5 text-[14px] text-bink outline-none transition-colors focus:border-bink"
+              <MonthPicker
+                year={effectiveYear}
+                month={effectiveMonth}
+                onChange={(y, m) => { setEffectiveYear(y); if (m) setEffectiveMonth(m) }}
               />
             </div>
           )}
@@ -362,22 +364,21 @@ export function EditRecurringModal({ entry, open, onOpenChange }: Props) {
                 <div className="mb-2.5 text-[12px] font-bold text-bred">
                   Stop this {isIncome ? 'income' : 'subscription'}
                 </div>
-                <div className="mb-2.5">
-                  <label className="mb-1 block text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
-                    End date
+                <div className="mb-2.5 flex items-center justify-between">
+                  <label className="text-[11px] font-bold uppercase tracking-[0.07em] text-bmuted">
+                    Stop from month
                   </label>
-                  <input
-                    type="month"
-                    value={stopDate}
-                    onChange={e => setStopDate(e.target.value)}
-                    className="h-[40px] w-full rounded-[10px] border border-bline bg-bsurface px-3 text-[14px] text-bink outline-none focus:border-bred"
+                  <MonthPicker
+                    year={stopYear}
+                    month={stopMonth}
+                    onChange={(y, m) => { setStopYear(y); if (m) setStopMonth(m) }}
                   />
                 </div>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={handleStop}
-                    disabled={isPending || !stopDate}
+                    disabled={isPending}
                     className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] bg-bred py-[8px] text-[12.5px] font-bold text-white transition-colors hover:bg-bred/90 disabled:opacity-40"
                   >
                     <StopCircle size={13} />
