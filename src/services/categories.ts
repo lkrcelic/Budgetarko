@@ -2,11 +2,16 @@ import { supabase } from '@/lib/supabase'
 import type { Category, CategoryType } from '@/types'
 import { DEFAULT_CATEGORIES } from '@/lib/constants'
 
-/** Fetch all categories for the current user */
-export async function fetchCategories(): Promise<Category[]> {
+/**
+ * Fetch categories for a given owner (user_id).
+ * When viewing a shared account, pass the owner's user_id.
+ * RLS permits the query as long as a share exists.
+ */
+export async function fetchCategories(ownerId: string): Promise<Category[]> {
   const { data, error } = await supabase
     .from('categories')
     .select('*')
+    .eq('user_id', ownerId)
     .order('is_default', { ascending: false })
     .order('name', { ascending: true })
 

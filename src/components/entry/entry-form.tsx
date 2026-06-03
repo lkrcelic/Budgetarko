@@ -46,7 +46,7 @@ export function EntryForm({
   const appMonth  = useAppStore(s => s.month)
 
   const meta       = KIND_META[kind]
-  const isIncome   = kind === 'income'
+  const isIncome   = kind === 'income' || kind === 'scheduled_income'
   const catType    = isIncome ? 'income' : 'expense'
   const categories = useActiveCategories(catType)
 
@@ -135,7 +135,7 @@ export function EntryForm({
             start_year:   values.start_month != null ? values.start_year : undefined,
             start_month:  values.start_month,
           }
-        : kind === 'subscription'
+        : (kind === 'subscription' || kind === 'scheduled_income')
         ? { frequency: values.frequency }
         : {}
 
@@ -167,12 +167,12 @@ export function EntryForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="relative flex flex-1 flex-col"
+      className="relative flex min-h-0 flex-1 flex-col"
       noValidate
     >
       {/* Scrollable body — hidden when pad is open */}
       <div
-        className="flex-1 overflow-y-auto px-4"
+        className="min-h-0 flex-1 overflow-y-auto px-4"
         style={{ paddingBottom: padOpen ? 8 : 110 }}
       >
         {/* Amount display */}
@@ -221,7 +221,13 @@ export function EntryForm({
         </p>
         <input
           {...register('description')}
-          placeholder={`e.g. ${kind === 'card' ? 'Madrac Vitapur' : kind === 'subscription' ? 'Netflix' : 'Weekly groceries'}`}
+          placeholder={`e.g. ${
+            kind === 'card'             ? 'Madrac Vitapur' :
+            kind === 'subscription'     ? 'Netflix' :
+            kind === 'scheduled_income' ? 'Monthly salary' :
+            kind === 'income'           ? 'Freelance project' :
+            'Weekly groceries'
+          }`}
           onFocus={() => setPadOpen(false)}
           className="h-[46px] w-full rounded-[13px] border border-bline bg-bsurface px-[14px] text-[14.5px] text-bink outline-none transition-colors focus:border-bink"
         />
@@ -258,8 +264,8 @@ export function EntryForm({
           />
         )}
 
-        {/* Subscription-specific fields */}
-        {kind === 'subscription' && (
+        {/* Subscription / Scheduled-income fields (same form, different kind) */}
+        {(kind === 'subscription' || kind === 'scheduled_income') && (
           <SubscriptionFields
             frequency={frequency as FrequencyType}
             onChange={f => setValue('frequency', f)}

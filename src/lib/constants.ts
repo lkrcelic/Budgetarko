@@ -8,13 +8,14 @@ export const MONTHS_LONG = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ] as const
 
-export const ENTRY_KINDS = ['expense', 'income', 'card', 'subscription'] as const
+export const ENTRY_KINDS = ['expense', 'income', 'card', 'subscription', 'scheduled_income'] as const
 
 export const KIND_META = {
-  expense:      { label: 'Expense',           color: '#b5503e', soft: '#f7ece9' },
-  income:       { label: 'Income',            color: '#1f8a5b', soft: '#e9f3ee' },
-  card:         { label: 'Card installment',  color: '#b08a3e', soft: '#f5efe1' },
-  subscription: { label: 'Subscription',      color: '#8a5b9e', soft: '#f1ebf4' },
+  expense:           { label: 'Expense',            color: '#b5503e', soft: '#f7ece9' },
+  income:            { label: 'Income',             color: '#1f8a5b', soft: '#e9f3ee' },
+  card:              { label: 'Card installment',   color: '#b08a3e', soft: '#f5efe1' },
+  subscription:      { label: 'Subscription',       color: '#8a5b9e', soft: '#f1ebf4' },
+  scheduled_income:  { label: 'Scheduled income',   color: '#0e7490', soft: '#e0f7fa' },
 } as const
 
 export const DEFAULT_CATEGORIES = {

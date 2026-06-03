@@ -8,13 +8,14 @@ interface DesktopShellProps {
   annual: ReactNode
   installments: ReactNode
   categories: ReactNode
+  settings: ReactNode
 }
 
 /**
  * Desktop layout: fixed sidebar on the left, scrollable main on the right.
  * Matches .d-root from prototype.
  */
-export function DesktopShell({ monthly, annual, installments, categories }: DesktopShellProps) {
+export function DesktopShell({ monthly, annual, installments, categories, settings }: DesktopShellProps) {
   return (
     <div className="flex min-h-dvh bg-bbg text-[14px]">
       <Sidebar />
@@ -25,6 +26,7 @@ export function DesktopShell({ monthly, annual, installments, categories }: Desk
           <Route path="/annual"       element={annual}       />
           <Route path="/installments" element={installments} />
           <Route path="/categories"   element={categories}   />
+          <Route path="/settings"     element={settings}     />
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/annual" replace />} />
         </Routes>

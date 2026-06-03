@@ -1,23 +1,25 @@
-import { ArrowDown, ArrowUp, CreditCard, RefreshCw } from 'lucide-react'
+import { ArrowDown, ArrowUp, CreditCard, RefreshCw, CalendarCheck } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { KIND_META } from '@/lib/constants'
 import type { EntryKind } from '@/types'
 
 const KIND_SUBTITLES: Record<EntryKind, string> = {
-  expense:      'A one-off cost',
-  income:       'Money coming in',
-  card:         'Split across months',
-  subscription: 'Recurring charge',
+  expense:          'A one-off cost',
+  income:           'Money coming in',
+  card:             'Split across months',
+  subscription:     'Recurring expense',
+  scheduled_income: 'Recurring income',
 }
 
 const KIND_ICONS: Record<EntryKind, LucideIcon> = {
-  expense:      ArrowDown,
-  income:       ArrowUp,
-  card:         CreditCard,
-  subscription: RefreshCw,
+  expense:          ArrowDown,
+  income:           ArrowUp,
+  card:             CreditCard,
+  subscription:     RefreshCw,
+  scheduled_income: CalendarCheck,
 }
 
-const KINDS: EntryKind[] = ['expense', 'income', 'card', 'subscription']
+const KINDS: EntryKind[] = ['expense', 'income', 'card', 'subscription', 'scheduled_income']
 
 interface TypeChooserProps {
   onSelect: (kind: EntryKind) => void

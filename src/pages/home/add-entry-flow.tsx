@@ -1,15 +1,16 @@
 import { useState } from 'react'
-import { X, ChevronLeft, TrendingDown, TrendingUp, CreditCard, RefreshCw } from 'lucide-react'
+import { X, ChevronLeft, TrendingDown, TrendingUp, CreditCard, RefreshCw, CalendarCheck } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { KIND_META } from '@/lib/constants'
 import { EntryForm } from '@/components/entry/entry-form'
 import type { EntryKind } from '@/types'
 
 const TYPE_CARDS: Array<{ kind: EntryKind; sub: string; Icon: LucideIcon }> = [
-  { kind: 'expense',      sub: 'A one-off cost',      Icon: TrendingDown },
-  { kind: 'income',       sub: 'Money coming in',     Icon: TrendingUp   },
-  { kind: 'card',         sub: 'Split across months', Icon: CreditCard   },
-  { kind: 'subscription', sub: 'Recurring charge',    Icon: RefreshCw    },
+  { kind: 'expense',          sub: 'A one-off cost',      Icon: TrendingDown  },
+  { kind: 'income',           sub: 'Money coming in',     Icon: TrendingUp    },
+  { kind: 'card',             sub: 'Split across months', Icon: CreditCard    },
+  { kind: 'subscription',     sub: 'Recurring expense',   Icon: RefreshCw     },
+  { kind: 'scheduled_income', sub: 'Recurring income',    Icon: CalendarCheck },
 ]
 
 interface AddEntryFlowProps {

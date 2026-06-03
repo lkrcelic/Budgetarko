@@ -1,14 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as api from '@/services/categories'
+import { useAppStore } from '@/stores/app-store'
 import type { Category } from '@/types'
 
-const CATEGORIES_KEY = ['categories'] as const
-
-/** Fetch all categories for the current user */
+/** Fetch all categories for the currently active account owner */
 export function useCategories() {
+  const activeOwnerId = useAppStore(s => s.activeOwnerId)
   return useQuery({
-    queryKey: CATEGORIES_KEY,
-    queryFn: api.fetchCategories,
+    queryKey: ['categories', activeOwnerId],
+    queryFn:  () => api.fetchCategories(activeOwnerId!),
+    enabled:  !!activeOwnerId,
   })
 }
 
@@ -25,7 +26,7 @@ export function useCreateCategory() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (cat: Pick<Category, 'name' | 'type'>) => api.createCategory(cat),
-    onSuccess: () => qc.invalidateQueries({ queryKey: CATEGORIES_KEY }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
   })
 }
 
@@ -35,6 +36,6 @@ export function useToggleCategory() {
   return useMutation({
     mutationFn: ({ id, active }: { id: string; active: boolean }) =>
       api.toggleCategory(id, active),
-    onSuccess: () => qc.invalidateQueries({ queryKey: CATEGORIES_KEY }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
   })
 }

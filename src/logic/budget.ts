@@ -47,7 +47,8 @@ export function expand(entry: Entry): MonthOccurrence[] {
       break
     }
 
-    case 'subscription': {
+    case 'subscription':
+    case 'scheduled_income': {
       const freq = entry.frequency ?? 'monthly'
       if (freq === 'once') {
         out.push({ idx: base, amount: entry.amount })
@@ -85,7 +86,9 @@ export function buildYear(entries: Entry[], profileId: string, year: number): Ye
 
   for (const entry of entries) {
     if (entry.profile_id !== profileId) continue
-    const bucket = entry.kind === 'income' ? incomeCats : expenseCats
+    const bucket = (entry.kind === 'income' || entry.kind === 'scheduled_income')
+      ? incomeCats
+      : expenseCats
 
     for (const { idx, amount } of expand(entry)) {
       const m = idx - base
@@ -151,7 +154,12 @@ export function monthItems(
         inst = { n: idx - startIdx + 1, of: entry.installments! }
       }
 
-      result.push({ entry, amount, income: entry.kind === 'income', inst })
+      result.push({
+        entry,
+        amount,
+        income: entry.kind === 'income' || entry.kind === 'scheduled_income',
+        inst,
+      })
     }
   }
 

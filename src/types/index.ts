@@ -1,4 +1,4 @@
-export type EntryKind = 'expense' | 'income' | 'card' | 'subscription'
+export type EntryKind = 'expense' | 'income' | 'card' | 'subscription' | 'scheduled_income'
 export type FrequencyType = 'monthly' | 'yearly' | 'once'
 export type CategoryType = 'income' | 'expense'
 
@@ -67,6 +67,26 @@ export interface InstallmentPlan {
   total: number      // total number of installments
   done: boolean
   remaining: number  // remaining amount
+}
+
+// ── Account sharing ────────────────────────────────────────────
+
+export interface UserLookup {
+  user_id: string
+  email: string
+  created_at: string
+}
+
+export interface AccountShare {
+  id: string
+  owner_user_id: string
+  shared_with_uid: string
+  created_at: string
+}
+
+/** Share record enriched with the other party's email */
+export interface AccountShareWithEmail extends AccountShare {
+  email: string
 }
 
 /** Aggregated yearly data for the annual matrix */

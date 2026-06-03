@@ -75,6 +75,14 @@ button {
   color: inherit;
 }
 
+/* ── Prevent iOS Safari auto-zoom on input focus ────── */
+/* Safari zooms in when font-size < 16px; this stops it */
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
 /* ── Utility ────────────────────────────────────────── */
 .mono-num {
   font-variant-numeric: tabular-nums;

@@ -15,6 +15,7 @@ import MonthlyPage       from '@/pages/monthly/monthly-page'
 import AnnualPage        from '@/pages/annual/annual-page'
 import InstallmentsPage  from '@/pages/installments/installments-page'
 import CategoriesPage    from '@/pages/categories/categories-page'
+import SettingsPage      from '@/pages/settings/settings-page'
 
 // ── Loading / setup screens ────────────────────────────────────
 
@@ -49,16 +50,26 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 }
 
 function ProfileGate({ children }: { children: React.ReactNode }) {
+  const { user }                 = useAuth()
   const { data: profiles, isLoading } = useProfiles()
   const currentProfileId = useAppStore(s => s.currentProfileId)
-  const setProfileId     = useAppStore(s => s.setProfileId)
+  const activeOwnerId    = useAppStore(s => s.activeOwnerId)
+  const switchProfile    = useAppStore(s => s.switchProfile)
 
   useEffect(() => {
-    if (!profiles || profiles.length === 0) return
-    if (!profiles.some(p => p.id === currentProfileId)) {
-      setProfileId(profiles[0].id)
+    if (!profiles || profiles.length === 0 || !user) return
+
+    const currentProfile = profiles.find(p => p.id === currentProfileId)
+
+    if (!currentProfile) {
+      // Pick the first profile that belongs to this user (own account first)
+      const ownProfile = profiles.find(p => p.user_id === user.id) ?? profiles[0]
+      switchProfile(ownProfile.id, ownProfile.user_id)
+    } else if (currentProfile.user_id !== activeOwnerId) {
+      // Sync activeOwnerId in case it was cleared (e.g. after store reset)
+      switchProfile(currentProfile.id, currentProfile.user_id)
     }
-  }, [profiles, currentProfileId, setProfileId])
+  }, [profiles, currentProfileId, activeOwnerId, user, switchProfile])
 
   if (isLoading) return <LoadingScreen text="Loading profiles…" />
   if (!profiles || profiles.length === 0) return <SetupScreen />
@@ -77,6 +88,7 @@ function AppLayout() {
         annual={<AnnualPage />}
         installments={<InstallmentsPage />}
         categories={<CategoriesPage />}
+        settings={<SettingsPage />}
       />
     )
   }

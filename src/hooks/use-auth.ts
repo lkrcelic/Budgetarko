@@ -3,6 +3,7 @@ import type { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { seedDefaultCategories } from '@/services/categories'
 import { createProfile } from '@/services/profiles'
+import { upsertUserLookup } from '@/services/sharing'
 
 interface AuthState {
   user: User | null
@@ -35,8 +36,12 @@ export function useAuth() {
       async (event, session) => {
         setState({ user: session?.user ?? null, session, loading: false })
 
-        // First login — seed data
+        // On every login: keep the email lookup table up to date
         if (event === 'SIGNED_IN' && session?.user) {
+          const email = session.user.email
+          if (email) {
+            await upsertUserLookup(session.user.id, email).catch(() => {})
+          }
           await bootstrapNewUser(session.user)
         }
       },
